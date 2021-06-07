@@ -1,7 +1,6 @@
 /*
 Powerbank powered Humidity controller based on: Arduino Nano 33 BLE Sense and Grove Water Atomizer
 */
-
 #include <ArduinoBLE.h>
 #include <Arduino_HTS221.h>
 #include "mbed.h"
@@ -13,9 +12,6 @@ Powerbank powered Humidity controller based on: Arduino Nano 33 BLE Sense and Gr
 #define LED_BUILTIN 13
 
 #define ATOMIZER 10
-
-float old_temp = 0;
-float old_hum = 0;
 
 static unsigned int pinNumber = 9;
 
@@ -62,21 +58,19 @@ void setup() {
 void loop() {
   // Run Fan to prevent Powerbank shutdown and provide ventilation
   // 180 seconds "pause" + 10 seconds run 
-  for(int counter = 1;counter <= 11;counter++) {
-  // 0.5 second Fan ON at
-  run_fan( 1.0 );
-  check_humidity(1);  // 1x500 ms = 500 ms
-  // 14 second Fan OFF
-  run_fan( 0.0 );
-  check_humidity(28); // 28x500ms = 14 sec
+  for(int counter = 1;counter <= 12;counter++) {
+  // 400 ms power burst to keep the powerbank alive
+  power_burst(400);
+  // Check humidity for 14 seconds
+  check_humidity(14); 
   }
 
-  // 10 second Fan ON
+  // Switch ON Fan for 10 seconds
   run_fan( 1.0 );
-  check_humidity(20); // 20x500ms = 10 sec
-  // 14 second Fan OFF
+  check_humidity(10);
   run_fan( 0.0 );
-  check_humidity(28); // 28x500ms = 14 sec
+  // Check humidity for 14 seconds
+  check_humidity(14);
 }
 
 void check_humidity(int s){
@@ -110,16 +104,24 @@ void check_humidity(int s){
     if (central) {
       tempCharacteristic.writeValue(temperature);
       humidCharacteristic.writeValue(humidity);
+      digitalWrite(LED_BUILTIN, HIGH);
     }
-    delay(100);
+    delay(200);
     digitalWrite(RED, HIGH);
     digitalWrite(GREEN, HIGH);
     digitalWrite(BLUE, HIGH);
-    delay(400);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(800);
   }
 }
 
 void run_fan(float speed) {
   pin.period( 0.00004 ); // (1 / 0.00004s) = 25kHZ
   pin.write( speed );
+}
+
+void power_burst(int ms){
+  run_fan(1.0);
+  delay(ms);
+  run_fan(0.0);
 }
