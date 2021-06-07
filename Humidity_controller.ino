@@ -59,8 +59,8 @@ void loop() {
   // Run Fan to prevent Powerbank shutdown and provide ventilation
   // 180 seconds "pause" + 10 seconds run 
   for(int counter = 1;counter <= 12;counter++) {
-  // 400 ms power burst to keep the powerbank alive
-  power_burst(400);
+  // 500 ms power burst to keep the powerbank alive
+  power_burst(500);
   // Check humidity for 14 seconds
   check_humidity(14); 
   }
