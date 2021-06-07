@@ -1,5 +1,5 @@
 /*
-Powerbank powered Humidity controller based on: Arduino Nano 33 BLE Sense and Grove Water Atomizer
+Powerbank powered "Humidity controller" based on: Arduino Nano 33 BLE Sense and Grove Water Atomizer
 */
 #include <ArduinoBLE.h>
 #include <Arduino_HTS221.h>
@@ -58,9 +58,11 @@ void setup() {
 void loop() {
   // Run Fan to prevent Powerbank shutdown and provide ventilation
   // 180 seconds "pause" + 10 seconds run 
-  for(int counter = 1;counter <= 12;counter++) {
-  // 500 ms power burst to keep the powerbank alive
-  power_burst(500);
+  for(int counter = 1;counter <= 11;counter++) {
+  // 1 second power burst to keep the powerbank alive
+  run_fan( 1.0 );
+  check_humidity(1);
+  run_fan( 0.0 );
   // Check humidity for 14 seconds
   check_humidity(14); 
   }
@@ -118,10 +120,4 @@ void check_humidity(int s){
 void run_fan(float speed) {
   pin.period( 0.00004 ); // (1 / 0.00004s) = 25kHZ
   pin.write( speed );
-}
-
-void power_burst(int ms){
-  run_fan(1.0);
-  delay(ms);
-  run_fan(0.0);
 }
